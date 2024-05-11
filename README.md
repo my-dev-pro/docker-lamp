@@ -25,10 +25,10 @@ latest released version
 
 ## Installation
 [comment]: <> (Run docker container)
-docker-compose up -d
+`docker-compose up -d`
 
 Your LAMP stack is now ready!! You can access it via `http://localhost`.
 
 ## Access to container bash
 [comment]: <> (Access to bash command)
-docker exec -it mydev-lamp_apache_1 bash
+`docker exec -it mydev-lamp_apache_1 bash`
