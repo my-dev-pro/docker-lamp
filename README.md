@@ -18,10 +18,10 @@ A basic LAMP stack environment built using Docker Compose. It consists of the fo
 | 8.3         | Available |
 
 # Available Composer Version
-latest released version
+Latest released version
 
 # Available NodeJS Version
-latest released version
+Latest released version
 
 ## Installation
 [comment]: <> (Run docker container)
