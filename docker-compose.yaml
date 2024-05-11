@@ -1,0 +1,46 @@
+version: '3.9'
+services:
+  apache:
+    build: 
+      context: .
+      dockerfile: ./php/Dockerfile.apache83
+    ports:
+      - "80:80"
+    depends_on:
+      - db
+    links:
+      - db
+    volumes:
+      - type: bind
+        source: ./html
+        target: /var/www/html
+        consistency: delegated
+      - ~/.composer/auth.json:/root/.composer/auth.json
+      # Enable the next line if you want to add a custom php.ini
+      #- ./php.ini:/usr/local/etc/php/conf.d/999-customphp.ini
+
+  db:
+    image: mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    volumes:
+      - type: volume
+        source: dbdata
+        target: /var/lib/mysql
+        consistency: delegated
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: database
+      MYSQL_USER: mydev
+      MYSQL_PASSWORD: root
+    
+  phpmyadmin:
+    image: phpmyadmin
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: root
+volumes:
+  dbdata:
