@@ -1,4 +1,13 @@
-# Available PHP Versions
+# Docker LAMP
+
+A basic LAMP stack environment built using Docker Compose. It consists of the following:
+
+- PHP
+- Apache
+- MySQL
+- phpMyAdmin
+
+## Available PHP Versions
 
 | PHP Version | Status    |
 |-------------|-----------|
@@ -14,8 +23,11 @@ latest released version
 # Available NodeJS Version
 latest released version
 
+## Installation
 [comment]: <> (Run docker container)
 docker-compose up -d
+
+Your LAMP stack is now ready!! You can access it via `http://localhost`.
 
 [comment]: <> (Access to bash command)
 docker exec -it mydev-lamp_apache_1 bash# docker-lamp
