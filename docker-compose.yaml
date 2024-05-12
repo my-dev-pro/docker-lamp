@@ -10,20 +10,22 @@ services:
       - db
     links:
       - db
+    networks:
+      - mydev
     volumes:
       - type: bind
         source: ./html
         target: /var/www/html
         consistency: delegated
-      - ~/.composer/auth.json:/root/.composer/auth.json
+      # - ~/.composer/auth.json:/root/.composer/auth.json
       # Enable the next line if you want to add a custom php.ini
       #- ./php.ini:/usr/local/etc/php/conf.d/999-customphp.ini
 
   db:
     image: mysql
     restart: always
-    ports:
-      - "3306:3306"
+    expose:
+     - 3306
     volumes:
       - type: volume
         source: dbdata
@@ -34,6 +36,8 @@ services:
       MYSQL_DATABASE: database
       MYSQL_USER: mydev
       MYSQL_PASSWORD: root
+    networks:
+      - mydev
     
   phpmyadmin:
     image: phpmyadmin
@@ -42,5 +46,12 @@ services:
     environment:
       PMA_HOST: db
       MYSQL_ROOT_PASSWORD: root
+    networks:
+      - mydev
+
 volumes:
   dbdata:
+
+networks:
+  mydev:
+    driver: bridge
