@@ -1,15 +1,15 @@
 version: '3.9'
 services:
-  apache:
+  apache74:
     build: 
       context: .
-      dockerfile: ./php/Dockerfile.apache83
+      dockerfile: ./php/Dockerfile.apache74
     ports:
       - "80:80"
     depends_on:
-      - db
+      - mysql
     links:
-      - db
+      - mysql
     networks:
       - mydev
     volumes:
@@ -21,7 +21,7 @@ services:
       # Enable the next line if you want to add a custom php.ini
       #- ./php.ini:/usr/local/etc/php/conf.d/999-customphp.ini
 
-  db:
+  mysql:
     image: mysql
     restart: always
     expose:
@@ -44,7 +44,7 @@ services:
     ports:
       - "8080:80"
     environment:
-      PMA_HOST: db
+      PMA_HOST: mysql
       MYSQL_ROOT_PASSWORD: root
     networks:
       - mydev
