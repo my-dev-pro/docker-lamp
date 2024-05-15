@@ -4,6 +4,9 @@ FROM php:7.4-apache
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN chmod a+rw -R /var/www/html
@@ -18,12 +21,12 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
 RUN docker-php-ext-install \
     # Add any PHP extensions you need here, for example:
         mysqli \
-        pdo_mysql
-        # gd \
+        pdo_mysql \
+        -j$(nproc) gd
         # etc...
 
 # Enable Apache modules if needed
-RUN a2enmod rewrite
+RUN a2enmod rewrite && a2enmod headers
 
 # Install Node.js
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
