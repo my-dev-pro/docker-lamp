@@ -36,6 +36,7 @@ services:
       MYSQL_DATABASE: database
       MYSQL_USER: mydev
       MYSQL_PASSWORD: root
+      MYSQL_COLLATION: utf8mb4_unicode_ci
     networks:
       - mydev
     
