@@ -1,39 +1,42 @@
 FROM php:7.4-apache
 
 # Install dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     unzip \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
+    libjpeg-dev \
+    libgif-dev \
+    libwebp-dev \
     libpng-dev \
+    libzip-dev \
+    nano \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
+# Set permissions
 RUN chmod a+rw -R /var/www/html
 
 # Install Composer
-RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
-    && php -r "if (hash_file('sha384', 'composer-setup.php') === 'dac665fdc30fdd8ec78b38b9800061b4150413ff2e3b6f88543c636f7cd84f6db9189d43a81e5503cda447da73c7e5b6') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); exit(1); } echo PHP_EOL;" \
-    && php composer-setup.php \
-    && php -r "unlink('composer-setup.php');" \
-    && mv composer.phar /usr/local/bin/composer
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
-RUN docker-php-ext-install \
-    # Add any PHP extensions you need here, for example:
+# Install PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp && \
+    docker-php-ext-install -j$(nproc) gd \
+    && docker-php-ext-install -j$(nproc) \
         mysqli \
-        pdo_mysql \
-        -j$(nproc) gd
-        # etc...
+        zip \
+        pdo_mysql
 
-# Enable Apache modules if needed
-RUN a2enmod rewrite && a2enmod headers
+# Enable Apache modules
+RUN a2enmod rewrite headers
 
 # Install Node.js
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs
+    && apt-get install -y --no-install-recommends nodejs \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN apt install nano
-
-# Confirm installation
-RUN node -v
-RUN npm -v
+# Confirm installations
+RUN node -v && npm -v
