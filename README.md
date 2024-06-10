@@ -27,7 +27,7 @@ Latest released version
 [comment]: <> (Run docker container)
 `docker-compose up -d`
 
-Your LAMP stack is now ready!! You can access it via `http://localhost`.
+Your LAMP stack is now ready!! You can access it via `https://localhost.test`.
 
 ## Access to container bash
 [comment]: <> (Access to bash command)
