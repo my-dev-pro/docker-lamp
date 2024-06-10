@@ -1,36 +1,32 @@
+# Use the official PHP 7.3 image with Apache
 FROM php:7.3-apache
 
 # Install dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y \
     git \
-    unzip \
-    libfreetype6-dev \
-    libjpeg62-turbo-dev \
-    libjpeg-dev \
-    libgif-dev \
-    libwebp-dev \
-    libpng-dev \
-    libzip-dev \
     nano \
+    certbot \
+    python3-certbot-apache \
+    libjpeg-dev \
+    libpng-dev \
+    libwebp-dev \
+    libfreetype6-dev \
+    zlib1g-dev \
+    libzip-dev \
     curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set permissions
-RUN chmod a+rw -R /var/www/html
-
-# Install Composer
-COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+    unzip \
+    gnupg
 
 # Install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp && \
-    docker-php-ext-install -j$(nproc) gd \
-    && docker-php-ext-install -j$(nproc) \
-        mysqli \
-        zip \
-        pdo_mysql
+RUN docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ --with-webp-dir=/usr/include/
+RUN docker-php-ext-install gd mysqli pdo pdo_mysql zip
 
-# Enable Apache modules
-RUN a2enmod rewrite headers
+# Install Composer
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+    && php -r "if (hash_file('sha384', 'composer-setup.php') === 'dac665fdc30fdd8ec78b38b9800061b4150413ff2e3b6f88543c636f7cd84f6db9189d43a81e5503cda447da73c7e5b6') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); exit(1); } echo PHP_EOL;" \
+    && php composer-setup.php \
+    && php -r "unlink('composer-setup.php');" \
+    && mv composer.phar /usr/local/bin/composer
 
 # Install Node.js
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
@@ -38,5 +34,36 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Confirm installations
-RUN node -v && npm -v
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite headers ssl
+
+# Install Let's Encrypt SSL for localhost.test
+RUN mkdir -p /etc/letsencrypt/live/localhost.test
+RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -keyout /etc/letsencrypt/live/localhost.test/privkey.pem \
+    -out /etc/letsencrypt/live/localhost.test/fullchain.pem \
+    -subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=localhost.test"
+
+# Configure Apache to use SSL
+RUN a2enmod ssl
+RUN echo "<VirtualHost *:80>\n\
+    ServerName localhost.test\n\
+    Redirect permanent / https://localhost.test/\n\
+</VirtualHost>\n\
+<VirtualHost *:443>\n\
+    ServerName localhost.test\n\
+    DocumentRoot /var/www/html\n\
+    SSLEngine on\n\
+    SSLCertificateFile /etc/letsencrypt/live/localhost.test/fullchain.pem\n\
+    SSLCertificateKeyFile /etc/letsencrypt/live/localhost.test/privkey.pem\n\
+    <Directory /var/www/html>\n\
+        AllowOverride All\n\
+        Require all granted\n\
+    </Directory>\n\
+</VirtualHost>" > /etc/apache2/sites-available/000-default.conf
+
+# Expose port 80 and 443
+EXPOSE 80 443
+
+# Start Apache
+CMD ["apache2-foreground"]

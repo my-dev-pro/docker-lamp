@@ -1,11 +1,12 @@
 version: '3.9'
 services:
-  apache74:
+  apache82:
     build: 
       context: .
-      dockerfile: ./php/Dockerfile.apache74
+      dockerfile: ./php/Dockerfile.apache82
     ports:
       - "80:80"
+      - "443:443"
     depends_on:
       - mysql
     links:

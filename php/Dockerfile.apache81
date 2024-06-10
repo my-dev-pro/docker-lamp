@@ -18,8 +18,8 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
 RUN docker-php-ext-install \
     # Add any PHP extensions you need here, for example:
         mysqli \
-        pdo_mysql
-        # gd \
+        pdo_mysql \
+        gd
         # etc...
 
 # Enable Apache modules if needed
