@@ -4,6 +4,11 @@ FROM php:8.1-apache
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
+    nano \
+    software-properties-common \
+    certbot \
+    python3-certbot-apache \
+    zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN chmod a+rw -R /var/www/html
@@ -16,21 +21,26 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && mv composer.phar /usr/local/bin/composer
 
 RUN docker-php-ext-install \
-    # Add any PHP extensions you need here, for example:
-        mysqli \
-        pdo_mysql \
-        gd
-        # etc...
+    # gd \
+    mysqli \
+    pdo_mysql
 
 # Enable Apache modules if needed
-RUN a2enmod rewrite && a2enmod headers
+RUN a2enmod rewrite headers ssl
 
 # Install Node.js
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
 
-RUN apt install nano
-
 # Confirm installation
 RUN node -v
 RUN npm -v
+
+# Setup SSL with Certbot (Let's Encrypt)
+RUN mkdir -p /etc/letsencrypt/live/localhost.test && \
+    openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
+    -keyout /etc/letsencrypt/live/localhost.test/privkey.pem \
+    -out /etc/letsencrypt/live/localhost.test/fullchain.pem \
+    -subj "/CN=localhost.test"
+
+COPY apache-config.conf /etc/apache2/sites-available/000-default.conf
