@@ -44,3 +44,6 @@ RUN mkdir -p /etc/letsencrypt/live/localhost.test && \
     -subj "/CN=localhost.test"
 
 COPY apache-config.conf /etc/apache2/sites-available/000-default.conf
+
+# Clean up
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
