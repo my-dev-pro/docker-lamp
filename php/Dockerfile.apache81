@@ -5,10 +5,18 @@ RUN apt-get update && apt-get install -y \
     git \
     unzip \
     nano \
+    curl \
     software-properties-common \
     certbot \
     python3-certbot-apache \
     zlib1g-dev \
+    libzip-dev \
+    libicu-dev \
+    libfreetype6-dev \
+    libavif-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
+    libwebp-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN chmod a+rw -R /var/www/html
@@ -20,10 +28,10 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && php -r "unlink('composer-setup.php');" \
     && mv composer.phar /usr/local/bin/composer
 
-RUN docker-php-ext-install \
-    # gd \
-    mysqli \
-    pdo_mysql
+# Configure and install PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-avif --with-jpeg --with-webp \
+    && docker-php-ext-install gd \
+    && docker-php-ext-install mysqli zip intl pdo_mysql
 
 # Enable Apache modules if needed
 RUN a2enmod rewrite headers ssl
