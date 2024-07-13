@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     certbot \
     python3-certbot-apache \
     zlib1g-dev \
+    libicu-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN chmod a+rw -R /var/www/html
@@ -23,6 +24,7 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
 RUN docker-php-ext-install \
     # gd \
     mysqli \
+    intl \
     pdo_mysql
 
 # Enable Apache modules if needed
