@@ -1,9 +1,9 @@
-version: '3.3'
+# version: "3.3"
 services:
-  apache74:
-    build: 
+  apache83:
+    build:
       context: .
-      dockerfile: ./php/Dockerfile.apache74
+      dockerfile: ./php/Dockerfile.apache83
     ports:
       - "80:80"
       - "443:443"
@@ -26,7 +26,7 @@ services:
     image: mysql
     restart: always
     expose:
-     - 3306
+      - 3306
     volumes:
       - type: volume
         source: dbdata
@@ -40,7 +40,7 @@ services:
       MYSQL_COLLATION: utf8mb4_unicode_ci
     networks:
       - mydev
-    
+
   phpmyadmin:
     image: phpmyadmin
     ports:

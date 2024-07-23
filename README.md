@@ -29,7 +29,7 @@ Latest released version
 
 ## Add new local domain in hosts file
 
-ubuntu 22.04 => `nano /etc/hosts` to look like this
+ubuntu 22.04 => `sudo nano /etc/hosts` to look like this
 
 `127.0.0.1       localhost.test`
 
