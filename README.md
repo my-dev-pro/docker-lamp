@@ -11,6 +11,7 @@ A basic LAMP stack environment built using Docker Compose. It consists of the fo
 
 | PHP Version | Status    |
 |-------------|-----------|
+| 5.6         | Available |
 | 7.3         | Available |
 | 7.4         | Available |
 | 8.1         | Available |
