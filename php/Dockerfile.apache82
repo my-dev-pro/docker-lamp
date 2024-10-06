@@ -31,7 +31,7 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
 # Configure and install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-avif --with-jpeg --with-webp \
     && docker-php-ext-install gd \
-    && docker-php-ext-install mysqli zip intl pdo_mysql
+    && docker-php-ext-install mysqli zip intl pdo_mysql bcmath
 
 # Enable Apache modules if needed
 RUN a2enmod rewrite headers ssl
