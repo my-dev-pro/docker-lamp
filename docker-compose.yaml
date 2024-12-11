@@ -1,9 +1,9 @@
 # version: "3.3"
 services:
-  apache56:
+  apache84:
     build:
       context: .
-      dockerfile: ./php/Dockerfile.apache56
+      dockerfile: ./php/Dockerfile.apache84
     ports:
       - "80:80"
       - "443:443"
