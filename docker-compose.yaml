@@ -1,16 +1,16 @@
 # version: "3.3"
 services:
-  apache84:
+  apache54:
     build:
       context: .
-      dockerfile: ./php/Dockerfile.apache84
+      dockerfile: ./php/Dockerfile.apache54
     ports:
       - "80:80"
       - "443:443"
     depends_on:
-      - mysql
+      - db
     links:
-      - mysql
+      - db
     networks:
       - mydev
     volumes:
@@ -22,8 +22,10 @@ services:
       # Enable the next line if you want to add a custom php.ini
       - ./php.ini:/usr/local/etc/php/conf.d/999-customphp.ini
 
-  mysql:
-    image: mysql
+  db:
+    # disable next line & Enable mariadb line while running php5
+    # image: mysql
+    image: mariadb:10.5 
     restart: always
     expose:
       - 3306
@@ -46,7 +48,7 @@ services:
     ports:
       - "8080:80"
     environment:
-      PMA_HOST: mysql
+      PMA_HOST: db
       MYSQL_ROOT_PASSWORD: root
     networks:
       - mydev
