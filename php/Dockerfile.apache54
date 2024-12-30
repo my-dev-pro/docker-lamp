@@ -14,6 +14,7 @@ RUN apt-get clean && apt-get update -o Dir::Cache::Clean="true" && \
     apt-get install -y --allow-unauthenticated --no-install-recommends \
     libcurl4-openssl-dev libpng-dev libjpeg-dev libfreetype6-dev \
     libicu-dev libmcrypt-dev zlib1g-dev libxml2-dev libxslt1-dev \
+    libssl-dev \
     libsqlite3-dev libmysqlclient-dev openssl nano && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
@@ -68,6 +69,31 @@ RUN a2ensite localhost.test.conf && \
 
 # Expose HTTP and HTTPS ports
 EXPOSE 80 443
+
+## running ftp server on container
+# Install PHP FTP extension
+RUN docker-php-ext-install ftp
+
+# Install vsftpd with legacy repositories
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys AA8E81B4331F7F50 && \
+    echo 'Acquire::AllowInsecureRepositories "true";' > /etc/apt/apt.conf.d/99insecure && \
+    echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99nocheck && \
+    apt-get update && apt-get install -y --allow-unauthenticated vsftpd && \
+    rm -rf /var/lib/apt/lists/*
+
+# Configure vsftpd
+RUN echo "listen=YES" >> /etc/vsftpd.conf && \
+    echo "anonymous_enable=NO" >> /etc/vsftpd.conf && \
+    echo "local_enable=YES" >> /etc/vsftpd.conf && \
+    echo "write_enable=YES" >> /etc/vsftpd.conf && \
+    echo "chroot_local_user=YES" >> /etc/vsftpd.conf
+
+# Create FTP user
+RUN useradd -m ftpuser && echo "ftpuser:ftppassword" | chpasswd
+RUN echo "local_root=/var/www/html" >> /etc/vsftpd.conf
+
+# Expose FTP port
+EXPOSE 21
 
 # Set entrypoint
 ENTRYPOINT ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
