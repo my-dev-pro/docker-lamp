@@ -24,7 +24,6 @@ services:
 
   mysql:
     image: mysql
-    restart: always
     expose:
       - 3306
     volumes:
