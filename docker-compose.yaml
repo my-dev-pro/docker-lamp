@@ -1,16 +1,16 @@
 # version: "3.3"
 services:
-  apache84:
+  apache82:
     build:
       context: .
-      dockerfile: ./php/Dockerfile.apache84
+      dockerfile: ./php/Dockerfile.apache82
     ports:
       - "80:80"
       - "443:443"
     depends_on:
-      - mysql
+      - db
     links:
-      - mysql
+      - db
     networks:
       - mydev
     volumes:
@@ -22,7 +22,7 @@ services:
       # Enable the next line if you want to add a custom php.ini
       - ./php.ini:/usr/local/etc/php/conf.d/999-customphp.ini
 
-  mysql:
+  db:
     image: mysql
     expose:
       - 3306
@@ -45,8 +45,19 @@ services:
     ports:
       - "8080:80"
     environment:
-      PMA_HOST: mysql
+      PMA_HOST: db
       MYSQL_ROOT_PASSWORD: root
+    depends_on:
+      - db
+    networks:
+      - mydev
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    ports:
+      - "1025:1025" # SMTP port
+      - "8025:8025" # Web UI port
     networks:
       - mydev
 
