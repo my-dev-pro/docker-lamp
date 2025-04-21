@@ -26,7 +26,9 @@ Latest released version
 
 ## Installation
 [comment]: <> (Run docker container)
-`docker-compose up -d`
+```sh
+docker-compose up -d
+```
 
 ## Add new local domain in hosts file
 
@@ -40,4 +42,13 @@ Your LAMP stack is now ready!! You can access it via `https://localhost.test` to
 
 ## Access to container bash
 [comment]: <> (Access to bash command)
-`docker exec -it mydev-lamp_apache_1 bash`
+```sh
+docker exec -it mydev-lamp_apache_1 bash
+```
+
+## Environment variables in the PHP service to configure mail sending:
+```
+SMTP_HOST: mailhog pointing to the mail service
+SMTP_PORT: 1025 for the SMTP connection
+```
+Access the Mailhog web interface at `http://localhost.test:8025` to see emails sent by your application
