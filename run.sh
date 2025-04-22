@@ -68,13 +68,7 @@ case "$1" in
 
     # Restart containers with the new configuration
     docker compose down
-    docker compose up -d --build
-
-    # Show running containers
-    docker compose ps
-
-    echo "Environment restarted with PHP $1"
-    echo "You can now access the environment at https://localhost.test"
+    docker compose up --build
     ;;
   *)
     echo "Invalid PHP version: $1"
