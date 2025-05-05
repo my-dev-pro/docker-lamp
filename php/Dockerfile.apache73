@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     curl \
     unzip \
+	vim \
     gnupg
 
 # Install PHP extensions
@@ -34,11 +35,21 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# copy vim config
+COPY .vimrc ~/.vimrc
+
+# Install vim plugins
+RUN curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+# Install PHPactor
+RUN composer global require phpactor/phpactor
+
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite headers ssl
 
 # Install Let's Encrypt SSL for localhost.test
 RUN mkdir -p /etc/letsencrypt/live/localhost.test
+
 RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -keyout /etc/letsencrypt/live/localhost.test/privkey.pem \
     -out /etc/letsencrypt/live/localhost.test/fullchain.pem \
@@ -46,6 +57,7 @@ RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 
 # Configure Apache to use SSL
 RUN a2enmod ssl
+
 RUN echo "<VirtualHost *:80>\n\
     ServerName localhost.test\n\
     Redirect permanent / https://localhost.test/\n\

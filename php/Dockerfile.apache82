@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     nano \
     curl \
+	vim \
     software-properties-common \
     certbot \
     python3-certbot-apache \
@@ -43,6 +44,15 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 # Confirm installation
 RUN node -v
 RUN npm -v
+
+# copy vim config
+COPY .vimrc ~/.vimrc
+
+# Install vim plugins
+RUN curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+# Install PHPactor
+RUN composer global require phpactor/phpactor
 
 # Setup SSL with Certbot (Let's Encrypt)
 RUN mkdir -p /etc/letsencrypt/live/localhost.test && \

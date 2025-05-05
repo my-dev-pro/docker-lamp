@@ -37,6 +37,7 @@ A modern, flexible LAMP (Linux, Apache, MySQL, PHP) development environment buil
 - **Composer**: Latest released version for dependency management
 - **NodeJS**: Latest LTS version for JavaScript/frontend development
 - **MailHog**: Email testing service with web interface
+- **VIM**: Vim Editor with pre-config
 
 ## 🚀 Quick Start
 
@@ -56,12 +57,12 @@ A modern, flexible LAMP (Linux, Apache, MySQL, PHP) development environment buil
 
 2. Make the run script executable:
    ```sh
-   chmod +x run.sh
+   chmod +x bin/*
    ```
 
 3. Choose your PHP version and start the environment:
    ```sh
-   ./run.sh 82  # For PHP 8.2
+   bin/start.sh 82  # For PHP 8.2
    ```
 
 The script will:
@@ -73,10 +74,10 @@ The script will:
 
 ### Switching PHP Versions
 
-The `run.sh` script makes it easy to switch between different PHP versions:
+The `bin/switch.sh` script makes it easy to switch between different PHP versions:
 
 ```sh
-./run.sh <php-version>
+bin/switch.sh <php-version>
 ```
 
 Available PHP version options:
@@ -92,10 +93,10 @@ Available PHP version options:
 Example:
 ```sh
 # Switch to PHP 7.4
-./run.sh 74
+bin/switch.sh 74
 
 # Switch to PHP 8.3
-./run.sh 83
+bin/switch.sh 83
 ```
 
 ### Host Configuration

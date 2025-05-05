@@ -1,10 +1,10 @@
 # version: "3.3"
 services:
   apache:
-    container_name: php-${PHP_VERSION}
     build:
       context: .
       dockerfile: ${PHP_IMAGE}
+    container_name: ${COMPOSE_PROJECT_NAME}-apache-${PHP_VERSION}
     ports:
       - "80:80"
       - "443:443"

@@ -17,9 +17,13 @@ RUN apt-get update && apt-get install -y \
     libjpeg62-turbo-dev \
     libpng-dev \
     libwebp-dev \
+	vim \
     && rm -rf /var/lib/apt/lists/*
 
 RUN chmod a+rw -R /var/www/html
+
+# Install vim plugins
+RUN curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
 # Install Composer
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
@@ -27,6 +31,9 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && php composer-setup.php \
     && php -r "unlink('composer-setup.php');" \
     && mv composer.phar /usr/local/bin/composer
+
+# Install PHPactor
+RUN composer global require phpactor/phpactor
 
 # Configure and install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-avif --with-jpeg --with-webp \
@@ -52,6 +59,9 @@ RUN mkdir -p /etc/letsencrypt/live/localhost.test && \
     -subj "/CN=localhost.test"
 
 COPY apache-config.conf /etc/apache2/sites-available/000-default.conf
+
+# copy vim config
+COPY .vimrc ~/.vimrc
 
 # Clean up
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
