@@ -64,6 +64,10 @@ A modern, flexible LAMP (Linux, Apache, MySQL, PHP) development environment buil
    ```sh
    bin/start.sh 82  # For PHP 8.2
    ```
+4- Install vim plugins in Normal mode:
+    ```vim
+    :PlugInstall
+    ```
 
 The script will:
 - Set up the selected PHP version
