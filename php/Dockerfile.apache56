@@ -1,69 +1,85 @@
-# Use an Ubuntu base image
-FROM ubuntu:20.04
+# Start from official PHP 5.6 with Apache
+FROM php:5.6-apache
 
-# Set environment variables to avoid interactive prompts
-ENV DEBIAN_FRONTEND=noninteractive
+# Update repository sources to use archive
+RUN sed -i -e 's/deb.debian.org/archive.debian.org/g' \
+           -e 's|security.debian.org|archive.debian.org/|g' \
+           -e '/stretch-updates/d' /etc/apt/sources.list
 
-# Install required packages and PHP 5.4
-RUN apt-get update && apt-get install -y \
-    software-properties-common \
-    wget \
-    gnupg2 \
-    lsb-release \
-    && add-apt-repository ppa:ondrej/php \
-    && apt-get update && apt-get install -y \
-    php5.6 \
-    php5.6-cli \
-    php5.6-common \
-    php5.6-mysql \
-    php5.6-gd \
-    php5.6-curl \
-    php5.6-zip \
-    php5.6-bcmath \
-    php5.6-mcrypt \
-    php5.6-mysqli \
-    php5.6-pdo \
-    php5.6-common \
-    apache2 \
-    libapache2-mod-php5.6 \
-    certbot \
-    python3-certbot-apache \
-    git \
-    nano \
-    curl \
+RUN echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/10no-check-valid-until
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --force-yes \
+    cron \
+    g++ \
+    gettext \
+    openssl \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libssl-dev \
+    libmcrypt-dev \
+    libxml2-dev \
+    libcurl4-openssl-dev \
+    libicu-dev \
+    libzip-dev \
+    zip \
     unzip \
-	vim \
-    && apt-get clean \
+    git \
+    vim \
     && rm -rf /var/lib/apt/lists/*
 
-# Enable Apache mod_rewrite
+# Configure GD with Freetype
+RUN docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/
+
+# Install PHP extensions
+RUN docker-php-ext-install \
+    mysql \
+    mysqli \
+    pdo_mysql \
+    gd \
+    mbstring \
+    soap \
+    intl \
+    zip \
+    curl \
+    mcrypt \
+    opcache
+
+# Enable Apache modules
+RUN a2enmod rewrite headers
+
+# Enable Apache modules
 RUN a2enmod rewrite ssl
 
-# Install vim plugins
-RUN curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-
 # Install Composer
-RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
-    && php -r "if (hash_file('sha384', 'composer-setup.php') === 'dac665fdc30fdd8ec78b38b9800061b4150413ff2e3b6f88543c636f7cd84f6db9189d43a81e5503cda447da73c7e5b6') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); exit(1); } echo PHP_EOL;" \
-    && php composer-setup.php \
-    && php -r "unlink('composer-setup.php');" \
-    && mv composer.phar /usr/local/bin/composer
+# RUN curl -sS https://getcomposer.org/installer | php -- \
+#     --install-dir=/usr/local/bin --filename=composer
 
-# Install PHPactor
-RUN composer global require phpactor/phpactor
+# Install Node.js + npm
+# RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+#     && apt-get install -y nodejs
 
-# Install Node.js
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs
+# Copy custom Apache vhost
+COPY ./apache-config.conf /etc/apache2/sites-available/000-default.conf
 
-# Confirm installation
-RUN node -v
-RUN npm -v
+# Copy vim config (if needed)
+COPY .vimrc /root/.vimrc
 
-# copy vim config
-COPY .vimrc ~/.vimrc
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite headers ssl
 
-# Configure Apache
+# Install Let's Encrypt SSL for localhost.test
+RUN mkdir -p /etc/letsencrypt/live/localhost.test
+
+RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -keyout /etc/letsencrypt/live/localhost.test/privkey.pem \
+    -out /etc/letsencrypt/live/localhost.test/fullchain.pem \
+    -subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=localhost.test"
+
+# Configure Apache to use SSL
+RUN a2enmod ssl
+
 RUN echo "<VirtualHost *:80>\n\
     ServerName localhost.test\n\
     Redirect permanent / https://localhost.test/\n\
@@ -80,18 +96,8 @@ RUN echo "<VirtualHost *:80>\n\
     </Directory>\n\
 </VirtualHost>" > /etc/apache2/sites-available/000-default.conf
 
-# Install Let's Encrypt SSL for localhost.test
-RUN mkdir -p /etc/letsencrypt/live/localhost.test && \
-    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-    -keyout /etc/letsencrypt/live/localhost.test/privkey.pem \
-    -out /etc/letsencrypt/live/localhost.test/fullchain.pem \
-    -subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=localhost.test"
-
-# Set the document root
-RUN mkdir -p /var/www/html
-
-# Expose ports 80 and 443
+# Expose port 80 and 443
 EXPOSE 80 443
 
 # Start Apache
-CMD ["apache2ctl", "-D", "FOREGROUND"]
+CMD ["apache2-foreground"]
